@@ -1,4 +1,16 @@
 import './globals.css'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'AWS Quiz App',
+  description: 'Aplicativo de quiz para certificação AWS Cloud Practitioner',
+  icons: [
+    {
+      rel: 'icon',
+      url: '/aws-quiz-app/favicon.ico',
+    },
+  ],
+}
 
 export default function RootLayout({
   children,
@@ -6,8 +18,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="pt-BR">
+      <body className="min-h-screen bg-background">
+        {children}
+      </body>
     </html>
   )
 }
