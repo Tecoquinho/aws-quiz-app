@@ -1,8 +1,10 @@
 'use client'
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Shuffle, ChevronLeft, ChevronRight, Filter, Trophy } from 'lucide-react';
+
 interface Question {
   id: number;
   category: string;
@@ -11,6 +13,7 @@ interface Question {
   correct: number;
   explanation: string;
 }
+
 interface QuizResult {
   date: string;
   score: number;
@@ -23,10 +26,12 @@ interface QuizResult {
     }
   };
 }
+
 interface QuizHistory {
   results: QuizResult[];
   averageScore: number;
 }
+
 const AwsQuizApp: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [hasStarted, setHasStarted] = useState(false);
@@ -41,6 +46,7 @@ const AwsQuizApp: React.FC = () => {
     results: [],
     averageScore: 0
   });
+
   const questions: Question[] = [
     // Conceitos de Nuvem
     {
@@ -754,6 +760,7 @@ const AwsQuizApp: React.FC = () => {
         explanation: "Escalabilidade vertical (scaling up) significa aumentar a capacidade de uma instância existente, como adicionar mais CPU ou memória."
       }
   ];
+
   // Carregar histórico ao iniciar
   useEffect(() => {
     const savedHistory = localStorage.getItem('awsQuizHistory');
@@ -761,6 +768,7 @@ const AwsQuizApp: React.FC = () => {
       setQuizHistory(JSON.parse(savedHistory));
     }
   }, []);
+
   const startQuiz = () => {
     if (!userName.trim()) {
       alert('Por favor, insira seu nome antes de começar!');
@@ -777,6 +785,7 @@ const AwsQuizApp: React.FC = () => {
     setSelectedOption(null);
     setShowResults(false);
   };
+
   const saveQuizResult = () => {
     const categoryScores: { [key: string]: { correct: number; total: number; percentage: number } } = {};
     
@@ -791,34 +800,41 @@ const AwsQuizApp: React.FC = () => {
       }
       categoryScores[question.category].total++;
     });
+
     quizQuestions.forEach((question, index) => {
       if (selectedOption === question.correct) {
         categoryScores[question.category].correct++;
       }
     });
+
     // Calcula percentuais
     Object.keys(categoryScores).forEach(category => {
       const score = categoryScores[category];
       score.percentage = (score.correct / score.total) * 100;
     });
+
     const newResult: QuizResult = {
       date: new Date().toISOString(),
       score,
       totalQuestions: quizQuestions.length,
       categoryScores
     };
+
     const updatedHistory = {
       results: [...quizHistory.results, newResult],
       averageScore: calculateAverageScore([...quizHistory.results, newResult])
     };
+
     setQuizHistory(updatedHistory);
     localStorage.setItem('awsQuizHistory', JSON.stringify(updatedHistory));
   };
+
   const calculateAverageScore = (results: QuizResult[]) => {
     if (results.length === 0) return 0;
     const sum = results.reduce((acc, result) => acc + (result.score / result.totalQuestions) * 100, 0);
     return sum / results.length;
   };
+
   const handleOptionSelect = (optionIndex: number) => {
     setSelectedOption(optionIndex);
     setShowAnswer(true);
@@ -826,6 +842,7 @@ const AwsQuizApp: React.FC = () => {
       setScore(score + 1);
     }
   };
+
   const handleNext = () => {
     if (currentIndex < quizQuestions.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -836,6 +853,7 @@ const AwsQuizApp: React.FC = () => {
       setShowResults(true);
     }
   };
+
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
@@ -843,6 +861,7 @@ const AwsQuizApp: React.FC = () => {
       setSelectedOption(null);
     }
   };
+
   const restartQuiz = () => {
     setHasStarted(false);
     setCurrentIndex(0);
@@ -852,9 +871,11 @@ const AwsQuizApp: React.FC = () => {
     setScore(0);
     setShowResults(false);
   };
+
   const ResultsView = () => {
     const percentage = (score / quizQuestions.length) * 100;
     const categories = Object.keys(quizHistory.results[quizHistory.results.length - 1].categoryScores);
+
     return (
       <div className="max-w-2xl mx-auto mt-20 p-4">
         <Card>
@@ -869,26 +890,44 @@ const AwsQuizApp: React.FC = () => {
                 <p className="text-3xl font-bold text-blue-600 mt-2">{percentage.toFixed(1)}%</p>
                 <p>Você acertou {score} de {quizQuestions.length} questões</p>
               </div>
+
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">Desempenho por Categoria</h3>
-                {categories.map(category => {
-                  const categoryScore = quizHistory.results[quizHistory.results.length - 1].categoryScores[category];
-                  return (
-                    <div key={category} className="mb-4">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>{category}</span>
-                        <span>{categoryScore.percentage.toFixed(1)}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: `${categoryScore.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+  <h3 className="text-lg font-semibold mb-4">Desempenho por Categoria</h3>
+  {categories.map(category => {
+    const categoryScore = quizHistory.results[quizHistory.results.length - 1].categoryScores[category];
+
+    // Verifique se categoryScore e categoryScore.percentage estão definidos
+    if (!categoryScore || categoryScore.percentage === undefined) {
+      return (
+        <div key={category} className="mb-4">
+          <div className="flex justify-between text-sm mb-1">
+            <span>{category}</span>
+            <span>0%</span> {/* Valor padrão caso o cálculo da porcentagem não tenha sido encontrado */}
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-gray-400 h-2 rounded-full" style={{ width: '0%' }} />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div key={category} className="mb-4">
+        <div className="flex justify-between text-sm mb-1">
+          <span>{category}</span>
+          <span>{categoryScore.percentage.toFixed(1)}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-600 h-2 rounded-full"
+            style={{ width: `${categoryScore.percentage}%` }}
+          />
+        </div>
+      </div>
+    );
+  })}
+</div>
+
               <div className="mt-6">
                 <h3 className="text-lg font-semibold mb-4">Seu Progresso</h3>
                 <div className="space-y-2">
@@ -896,6 +935,7 @@ const AwsQuizApp: React.FC = () => {
                   <p>Total de simulados: {quizHistory.results.length}</p>
                 </div>
               </div>
+
               <Button
                 onClick={restartQuiz}
                 className="w-full mt-6"
@@ -908,7 +948,9 @@ const AwsQuizApp: React.FC = () => {
       </div>
     );
   };
+
   const currentQuestion = quizQuestions[currentIndex];
+
   if (!hasStarted) {
     return (
       <div className="max-w-md mx-auto mt-20 p-4">
@@ -943,9 +985,11 @@ const AwsQuizApp: React.FC = () => {
       </div>
     );
   }
+
   if (showResults) {
     return <ResultsView />;
   }
+
   return (
     <div className="max-w-2xl mx-auto p-4">
       <div className="mb-4 flex flex-wrap justify-between items-center gap-4">
@@ -954,6 +998,7 @@ const AwsQuizApp: React.FC = () => {
           Questão {currentIndex + 1} de {quizQuestions.length}
         </span>
       </div>
+
       <Card className="mb-4">
         <CardContent className="p-6">
           <div className="mb-2">
@@ -996,6 +1041,7 @@ const AwsQuizApp: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
       <div className="flex justify-between">
         <Button
           variant="outline"
@@ -1021,4 +1067,5 @@ const AwsQuizApp: React.FC = () => {
     </div>
   );
 };
+
 export default AwsQuizApp;
